@@ -24,7 +24,8 @@ checks:
     network:
       egress:
         - registry.dagger.io
-        - "*.r2.cloudflarestorage.com"
+        - ghcr.io
+        - pkg-containers.githubusercontent.com # registry.dagger.io serves its blobs from here
         - cgr.dev
     steps:
       - name: install only

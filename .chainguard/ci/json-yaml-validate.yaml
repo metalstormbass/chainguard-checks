@@ -4,14 +4,9 @@ version: 1
 environment:
   packages: [python-3.13, py3.13-pyyaml, py3.13-jsonschema, py3.13-pathspec, py3.13-rfc3339-validator, busybox]
   vars:
-    # The schema_mappings the good and bad cases share.
-    MAPPINGS: |
-      - type: json
-        schema: schemas/person.json
-        files: ["*.json"]
-      - type: yaml
-        schema: schemas/config.yaml
-        files: config.yml
+    # The schema_mappings the good and bad cases share. A var cannot hold a
+    # newline, so it is flow-style YAML on one line.
+    MAPPINGS: '[{type: json, schema: schemas/person.json, files: ["*.json"]}, {type: yaml, schema: schemas/config.yaml, files: config.yml}]'
 
 checks:
   json-yaml-validate:

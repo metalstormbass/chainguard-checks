@@ -22,7 +22,9 @@ mounts this library at a pinned commit with `inputs:` and runs its script.
    the same path.
 2. Set the action's `with:` inputs as `vars:`, named `INPUT_<NAME>`
    uppercased, as the Actions runner names them. Each stub lists the common
-   ones; each script's header lists what is not ported.
+   ones; each script's header lists what is not ported. A var cannot hold a
+   newline, so give a multi-line input on one line (`schema_mappings` as
+   flow-style YAML, `files` space-separated), or export it in a `script:`.
 3. Keep `ref:` pinned to a full commit SHA of this repository; bump it to
    upgrade.
 

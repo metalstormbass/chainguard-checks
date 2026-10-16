@@ -32,7 +32,8 @@ checks:
     network:
       egress:
         - registry.dagger.io
-        - "*.r2.cloudflarestorage.com"
+        - ghcr.io
+        - pkg-containers.githubusercontent.com # registry.dagger.io serves its blobs from here
     inputs:
       - path: .chainguard-checks
         git:

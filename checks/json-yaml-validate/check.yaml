@@ -36,8 +36,8 @@ checks:
       # INPUT_JSON_SCHEMA: ./schemas/schema.json
       # INPUT_YAML_SCHEMA: ./schemas/schema.yaml
       # INPUT_EXCLUDE_FILE: ./exclude.txt
-      # INPUT_SCHEMA_MAPPINGS: |
-      #   - type: json
-      #     schema: ./schemas/index.json
-      #     files: [./data/index_*.json]
+      # A var cannot hold a newline: give multi-line inputs as one line,
+      # schema_mappings as flow-style YAML and files space-separated.
+      # INPUT_SCHEMA_MAPPINGS: '[{type: json, schema: ./schemas/index.json, files: [./data/index_*.json]}]'
+      # INPUT_FILES: ./data/a.json ./config/b.yaml
     cmd: [python3.13, -I, .chainguard-checks/checks/json-yaml-validate/run.py]
