@@ -1,0 +1,19 @@
+chainguard-checks
+
+The checks under checks/ are ports of the GitHub Actions below, as hardened
+in https://github.com/chainguard-actions. Each keeps its upstream behavior and
+input names; the upstream licenses apply to the ported logic.
+
+checks/json-yaml-validate  GrantBirki/json-yaml-validate        MIT
+  Copyright (c) Grant Birkinbine
+checks/black               psf/black                            MIT
+  Copyright (c) 2018 Łukasz Langa
+checks/replace-tokens      cschleiden/replace-tokens            MIT
+  Copyright (c) Christopher Schleiden
+checks/codespell           codespell-project/actions-codespell  MIT
+  Copyright (c) Peter Newman
+checks/dagger              dagger/dagger-for-github             Apache-2.0
+  Copyright Dagger, Inc.
+
+.chainguard/ci/services/docker is from chainguard-dev/apko (Apache-2.0),
+Copyright 2026 Chainguard, Inc.

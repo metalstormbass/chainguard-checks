@@ -1,0 +1,43 @@
+# Reusable check: json-yaml-validate, ported from GrantBirki/json-yaml-validate@v5.0.1.
+# Copy this file to .chainguard/ci/json-yaml-validate.yaml in your repository.
+#
+# Replaces:
+#   - uses: GrantBirki/json-yaml-validate@v5
+#     with:
+#       json_schema: ./schemas/schema.json
+#       exclude_file: ./exclude.txt
+#
+# Each `with:` input is a var named INPUT_<NAME>, uppercased, with the
+# action's defaults. The PR-comment inputs (github_token, comment,
+# comment_on_success, update_comment) and ajv_strict_mode are not ported: the
+# check's log carries the violations. JSON Schema validation uses
+# python-jsonschema in place of AJV, so messages are worded differently. The
+# library is mounted at .chainguard-checks and never validated itself.
+version: 1
+
+environment:
+  packages: [python-3.13, py3.13-pyyaml, py3.13-jsonschema, py3.13-pathspec, py3.13-rfc3339-validator]
+
+checks:
+  json-yaml-validate:
+    description: >-
+      Validates every JSON and YAML file in the repository parses, and
+      matches its schema when one is given (GrantBirki/json-yaml-validate, as
+      a Chainguard check).
+    trigger: [presubmit, postsubmit]
+    timeout: 10m
+    inputs:
+      - path: .chainguard-checks
+        git:
+          repo: https://github.com/metalstormbass/chainguard-checks
+          ref: __REF__ # __TAG__
+    vars:
+      INPUT_MODE: fail
+      # INPUT_JSON_SCHEMA: ./schemas/schema.json
+      # INPUT_YAML_SCHEMA: ./schemas/schema.yaml
+      # INPUT_EXCLUDE_FILE: ./exclude.txt
+      # INPUT_SCHEMA_MAPPINGS: |
+      #   - type: json
+      #     schema: ./schemas/index.json
+      #     files: [./data/index_*.json]
+    cmd: [python3.13, -I, .chainguard-checks/checks/json-yaml-validate/run.py]

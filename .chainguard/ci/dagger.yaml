@@ -1,0 +1,42 @@
+# Self-test for checks/dagger. The dagger engine runs as a container on the
+# docker service, which needs a root job.
+version: 1
+
+environment:
+  packages: [dagger~0.21, bash, busybox, findutils, sed]
+  services: [docker]
+
+checks:
+  dagger:
+    when:
+      changed:
+        - checks/dagger/**
+        - .chainguard/ci/dagger.yaml
+        - .chainguard/ci/services/docker/**
+    description: >-
+      Runs checks/dagger/run.sh with no command (install only, as the action),
+      then with a shell input that runs a container through the engine and
+      checks its stdout, and with a core call.
+    trigger: [presubmit, postsubmit]
+    user: root
+    resources: medium
+    timeout: 20m
+    network:
+      egress:
+        - registry.dagger.io
+        - "*.r2.cloudflarestorage.com"
+        - cgr.dev
+    steps:
+      - name: install only
+        script: bash checks/dagger/run.sh
+      - name: shell
+        script: |
+          set -eu
+          out=$(INPUT_SHELL='container | from cgr.dev/chainguard/wolfi-base | with-exec echo hello-from-dagger | stdout' \
+            bash checks/dagger/run.sh)
+          printf '%s\n' "$out"
+          printf '%s\n' "$out" | grep -qx hello-from-dagger
+      - name: core call
+        script: |
+          set -eu
+          INPUT_VERB=core INPUT_ARGS='version' bash checks/dagger/run.sh

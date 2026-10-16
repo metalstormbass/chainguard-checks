@@ -1,0 +1,35 @@
+# Reusable check: codespell, ported from codespell-project/actions-codespell@v2.4.3.
+# Copy this file to .chainguard/ci/codespell.yaml in your repository.
+#
+# Replaces:
+#   - uses: codespell-project/actions-codespell@v2
+#     with:
+#       skip: ./.git,./vendor
+#       ignore_words_list: crate
+#
+# Each `with:` input is a var named INPUT_<NAME>, uppercased; see
+# checks/codespell/run.sh for the list. The library is mounted at
+# .chainguard-checks and never spell-checked itself.
+version: 1
+
+environment:
+  packages: [py3.13-codespell-bin~2.4.3, busybox]
+
+checks:
+  codespell:
+    description: >-
+      Spell-checks the repository with codespell, failing on any finding
+      (codespell-project/actions-codespell, as a Chainguard check).
+    trigger: [presubmit, postsubmit]
+    timeout: 10m
+    inputs:
+      - path: .chainguard-checks
+        git:
+          repo: https://github.com/metalstormbass/chainguard-checks
+          ref: __REF__ # __TAG__
+    vars:
+      INPUT_SKIP: ./.git
+      # INPUT_IGNORE_WORDS_LIST: crate,te
+      # INPUT_CHECK_FILENAMES: "true"
+      # INPUT_ONLY_WARN: "true"
+    cmd: [sh, .chainguard-checks/checks/codespell/run.sh]

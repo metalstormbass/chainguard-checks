@@ -1,0 +1,52 @@
+# Self-test for checks/json-yaml-validate.
+version: 1
+
+environment:
+  packages: [python-3.13, py3.13-pyyaml, py3.13-jsonschema, py3.13-pathspec, py3.13-rfc3339-validator, busybox]
+  vars:
+    # The schema_mappings the good and bad cases share.
+    MAPPINGS: |
+      - type: json
+        schema: schemas/person.json
+        files: ["*.json"]
+      - type: yaml
+        schema: schemas/config.yaml
+        files: config.yml
+
+checks:
+  json-yaml-validate:
+    description: >-
+      Runs checks/json-yaml-validate/run.py over testdata/json-yaml-validate:
+      valid files pass with and without schema_mappings; a broken JSON file,
+      a duplicate YAML key and JSON and YAML schema violations each fail; and
+      mode warn passes. Then validates every JSON and YAML file in this
+      repository outside testdata.
+    trigger: [presubmit, postsubmit]
+    timeout: 5m
+    steps:
+      - name: valid files pass
+        script: cd testdata/json-yaml-validate/good && python3.13 -I ../../../checks/json-yaml-validate/run.py
+      - name: valid files pass their schema mappings
+        script: cd testdata/json-yaml-validate/good && INPUT_SCHEMA_MAPPINGS="$MAPPINGS" python3.13 -I ../../../checks/json-yaml-validate/run.py
+      - name: invalid files fail
+        script: |
+          cd testdata/json-yaml-validate/bad
+          out=$(INPUT_SCHEMA_MAPPINGS="$MAPPINGS" python3.13 -I ../../../checks/json-yaml-validate/run.py) && {
+            echo "expected schema violations in testdata/json-yaml-validate/bad" >&2
+            exit 1
+          }
+          printf '%s\n' "$out"
+          for want in 'Invalid JSON' '-1 is less than the minimum of 0' 'person.age is required.' \
+            'person.extra is not present in schema'; do
+            printf '%s\n' "$out" | grep -qF -- "$want" || { echo "missing violation: $want" >&2; exit 1; }
+          done
+          if python3.13 -I ../../../checks/json-yaml-validate/run.py; then
+            echo "expected the duplicate key in dupe.yaml to fail" >&2
+            exit 1
+          fi
+      - name: mode warn passes
+        script: cd testdata/json-yaml-validate/bad && INPUT_MODE=warn python3.13 -I ../../../checks/json-yaml-validate/run.py
+      - name: this repository's JSON and YAML are valid
+        script: |
+          INPUT_JSON_EXCLUDE_REGEX='^testdata/' INPUT_YAML_EXCLUDE_REGEX='^testdata/' \
+            python3.13 -I checks/json-yaml-validate/run.py

@@ -1,0 +1,5 @@
+# Every check file declares its own environment, so this empty default
+# changes none of them.
+version: 1
+
+environment: {}

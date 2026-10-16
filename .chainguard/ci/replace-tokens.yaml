@@ -1,0 +1,36 @@
+# Self-test for checks/replace-tokens.
+version: 1
+
+environment:
+  packages: [python-3.13, busybox]
+
+checks:
+  replace-tokens:
+    description: >-
+      Runs checks/replace-tokens/run.py over a copy of testdata/replace-tokens:
+      tokens with a variable are replaced by its value, a token with none by
+      the empty string, and custom delimiters are honored.
+    trigger: [presubmit, postsubmit]
+    timeout: 5m
+    vars:
+      BASE_URL: https://example.com
+      APP_NAME: demo
+    steps:
+      - name: default delimiters
+        script: |
+          set -eu
+          lib=$PWD/checks/replace-tokens/run.py
+          work=$(mktemp -d)
+          cp testdata/replace-tokens/app.conf.tmpl "$work"
+          cd "$work"
+          INPUT_FILES='["**/*.tmpl"]' python3.13 -I "$lib"
+          printf 'url: https://example.com\nname: demo\nmissing: \n' | diff -u - app.conf.tmpl
+      - name: custom delimiters
+        script: |
+          set -eu
+          lib=$PWD/checks/replace-tokens/run.py
+          work=$(mktemp -d)
+          cd "$work"
+          printf 'name={APP_NAME} kept=#{APP_NAME}#\n' >a.txt
+          INPUT_FILES=a.txt INPUT_TOKENPREFIX='{' INPUT_TOKENSUFFIX='}' python3.13 -I "$lib"
+          printf 'name=demo kept=#demo#\n' | diff -u - a.txt

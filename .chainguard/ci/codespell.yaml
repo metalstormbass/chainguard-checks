@@ -1,0 +1,28 @@
+# Self-test for checks/codespell.
+version: 1
+
+environment:
+  packages: [py3.13-codespell-bin~2.4.3, busybox]
+
+checks:
+  codespell:
+    description: >-
+      Runs checks/codespell/run.sh over testdata/codespell: clean text passes,
+      typos fail, and only_warn and ignore_words_list each turn the failure
+      into a pass.
+    trigger: [presubmit, postsubmit]
+    timeout: 5m
+    steps:
+      - name: clean text passes
+        script: cd testdata/codespell/good && sh ../../../checks/codespell/run.sh
+      - name: typos fail
+        script: |
+          cd testdata/codespell/bad
+          if sh ../../../checks/codespell/run.sh; then
+            echo "expected codespell to fail on testdata/codespell/bad" >&2
+            exit 1
+          fi
+      - name: only_warn passes
+        script: cd testdata/codespell/bad && INPUT_ONLY_WARN=true sh ../../../checks/codespell/run.sh
+      - name: ignore_words_list passes
+        script: cd testdata/codespell/bad && INPUT_IGNORE_WORDS_LIST=recieve,teh sh ../../../checks/codespell/run.sh

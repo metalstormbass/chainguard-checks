@@ -1,0 +1,46 @@
+# Reusable check: Dagger, ported from dagger/dagger-for-github@v8.4.1.
+# Copy this file to .chainguard/ci/dagger.yaml in your repository, and the
+# docker service with it: .chainguard/ci/services/docker/docker.yaml and
+# docker.sh from this library, to the same paths. The engine runs as a
+# container on that service, which needs a root job.
+#
+# Replaces:
+#   - uses: dagger/dagger-for-github@v8
+#     with:
+#       version: latest
+#       call: build --src .
+#
+# Each `with:` input is a var named INPUT_<NAME>, uppercased; dagger-flags is
+# INPUT_DAGGER_FLAGS. The CLI is the Wolfi dagger package, so pin it in
+# packages in place of version and commit. cloud-token and the summary inputs
+# are not ported. Add the hosts your pipeline pulls from to egress.
+version: 1
+
+environment:
+  packages: [dagger~0.21, bash, busybox, findutils, sed]
+  services: [docker]
+
+checks:
+  dagger:
+    description: >-
+      Runs a Dagger pipeline on an engine on the docker service
+      (dagger/dagger-for-github, as a Chainguard check).
+    trigger: [presubmit, postsubmit]
+    user: root
+    resources: medium
+    timeout: 30m
+    network:
+      egress:
+        - registry.dagger.io
+        - "*.r2.cloudflarestorage.com"
+    inputs:
+      - path: .chainguard-checks
+        git:
+          repo: https://github.com/metalstormbass/chainguard-checks
+          ref: __REF__ # __TAG__
+    vars:
+      INPUT_CALL: build --src .
+      # INPUT_MODULE: github.com/owner/repo/ci
+      # INPUT_VERB: check
+      # INPUT_WORKDIR: .
+    cmd: [bash, .chainguard-checks/checks/dagger/run.sh]

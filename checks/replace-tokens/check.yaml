@@ -1,0 +1,41 @@
+# Reusable step: replace-tokens, ported from cschleiden/replace-tokens@v1.4.
+# Copy the input and the first step into the check whose later steps read the
+# rendered files; the check below is a template that renders, then verifies
+# no token is left.
+#
+# Replaces:
+#   - uses: cschleiden/replace-tokens@v1
+#     with:
+#       files: '["**/*.json"]'
+#     env:
+#       CDN: https://somecdn.com
+#
+# INPUT_FILES, INPUT_TOKENPREFIX and INPUT_TOKENSUFFIX are the action's
+# inputs; token values are vars, as the action reads them from env. As
+# upstream, a token with no var becomes the empty string.
+version: 1
+
+environment:
+  packages: [python-3.13, busybox]
+
+checks:
+  replace-tokens:
+    description: >-
+      Replaces #{TOKEN}# placeholders in the matched files with the value of
+      the var TOKEN (cschleiden/replace-tokens, as a Chainguard step).
+    trigger: [presubmit, postsubmit]
+    timeout: 5m
+    inputs:
+      - path: .chainguard-checks
+        git:
+          repo: https://github.com/metalstormbass/chainguard-checks
+          ref: __REF__ # __TAG__
+    vars:
+      INPUT_FILES: '["**/*.json"]'
+      CDN: https://somecdn.com
+    steps:
+      - name: replace tokens
+        cmd: [python3.13, -I, .chainguard-checks/checks/replace-tokens/run.py]
+      # Your steps that read the rendered files go here, for example:
+      # - name: build
+      #   cmd: make build

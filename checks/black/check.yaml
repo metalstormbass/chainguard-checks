@@ -1,0 +1,41 @@
+# Reusable check: Black, ported from psf/black@26.10.1's action.
+# Copy this file to .chainguard/ci/black.yaml in your repository.
+#
+# Replaces:
+#   - uses: psf/black@stable
+#     with:
+#       options: --check --diff
+#       src: ./src
+#
+# Each `with:` input is a var named INPUT_<NAME>, uppercased; output-file is
+# INPUT_OUTPUT_FILE. Wolfi packages no Black, so it is installed from PyPI
+# into a venv, as the action does: INPUT_VERSION or INPUT_USE_PYPROJECT picks
+# the release, and 26.10.1 is the default. The library is mounted at
+# .chainguard-checks and never formatted itself.
+version: 1
+
+environment:
+  packages: [python-3.13, busybox]
+  vars:
+    PYTHON: python3.13
+
+checks:
+  black:
+    description: >-
+      Checks Python formatting with Black, failing with a diff on any file it
+      would reformat (psf/black, as a Chainguard check).
+    trigger: [presubmit, postsubmit]
+    timeout: 10m
+    network:
+      egress: [pypi.org, files.pythonhosted.org]
+    inputs:
+      - path: .chainguard-checks
+        git:
+          repo: https://github.com/metalstormbass/chainguard-checks
+          ref: __REF__ # __TAG__
+    vars:
+      INPUT_OPTIONS: --check --diff
+      INPUT_SRC: .
+      # INPUT_USE_PYPROJECT: "true"
+      # INPUT_JUPYTER: "true"
+    cmd: [sh, .chainguard-checks/checks/black/run.sh]

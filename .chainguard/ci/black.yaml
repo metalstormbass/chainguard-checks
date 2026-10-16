@@ -1,0 +1,31 @@
+# Self-test for checks/black. Wolfi packages no Black, so the port installs
+# it from PyPI, as the action does.
+version: 1
+
+environment:
+  packages: [python-3.13, busybox]
+  vars:
+    PYTHON: python3.13
+
+checks:
+  black:
+    description: >-
+      Runs checks/black/run.sh over testdata/black: formatted code passes and
+      unformatted code fails with a diff. Then formats this library's own
+      Python with the port.
+    trigger: [presubmit, postsubmit]
+    timeout: 10m
+    network:
+      egress: [pypi.org, files.pythonhosted.org]
+    steps:
+      - name: formatted code passes
+        script: cd testdata/black/good && sh ../../../checks/black/run.sh
+      - name: unformatted code fails
+        script: |
+          cd testdata/black/bad
+          if sh ../../../checks/black/run.sh; then
+            echo "expected black to fail on testdata/black/bad" >&2
+            exit 1
+          fi
+      - name: library python is formatted
+        script: INPUT_SRC=checks sh checks/black/run.sh
