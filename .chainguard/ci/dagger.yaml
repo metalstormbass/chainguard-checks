@@ -27,6 +27,7 @@ checks:
         - ghcr.io
         - pkg-containers.githubusercontent.com # registry.dagger.io serves its blobs from here
         - cgr.dev
+        - "*.r2.cloudflarestorage.com" # cgr.dev serves its blobs from here
     steps:
       - name: install only
         script: bash checks/dagger/run.sh
