@@ -38,7 +38,7 @@ checks:
       - path: .chainguard-checks
         git:
           repo: https://github.com/metalstormbass/chainguard-checks
-          ref: __REF__ # __TAG__
+          ref: dd78433fe8dd96c4b874935c0dfcb60c60ae6191 # v1.0.0
     vars:
       INPUT_CALL: build --src .
       # INPUT_MODULE: github.com/owner/repo/ci

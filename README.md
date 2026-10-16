@@ -42,7 +42,7 @@ checks:
       - path: .chainguard-checks
         git:
           repo: https://github.com/metalstormbass/chainguard-checks
-          ref: <commit SHA> # v1.0.0
+          ref: dd78433fe8dd96c4b874935c0dfcb60c60ae6191 # v1.0.0
     vars:
       INPUT_SKIP: ./.git,./vendor
       INPUT_IGNORE_WORDS_LIST: crate
