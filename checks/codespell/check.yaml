@@ -29,7 +29,7 @@ checks:
           ref: dd78433fe8dd96c4b874935c0dfcb60c60ae6191 # v1.0.0
     vars:
       INPUT_SKIP: ./.git
-      # INPUT_IGNORE_WORDS_LIST: crate,te
+      # INPUT_IGNORE_WORDS_LIST: crate
       # INPUT_CHECK_FILENAMES: "true"
       # INPUT_ONLY_WARN: "true"
     cmd: [sh, .chainguard-checks/checks/codespell/run.sh]
